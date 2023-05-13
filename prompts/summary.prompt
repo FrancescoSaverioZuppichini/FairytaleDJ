@@ -1,0 +1,7 @@
+This is a disney song, can you output me a string with a one sentence summary of the themes/emotions of the song? Be specific, we will use the emotions/themes as keywords to search later. JUST the summary, not an introduction.
+
+examples
+INPUT: <SONG>
+OUTPUT: <SUMMARY>
+
+{song}

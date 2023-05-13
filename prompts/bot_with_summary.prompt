@@ -1,0 +1,11 @@
+Given the following list of songs:
+
+{songs}
+
+Given an user input. Output the song name, ONLY THE SONG NAME, that will be appropriate with the user feelings/emotions. 
+
+For example: 
+Input: "Today I am not feeling great"
+<SONG_NAME>
+
+The user input is  "{user_input}", reply only with the song name

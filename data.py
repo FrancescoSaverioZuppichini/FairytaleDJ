@@ -1,66 +1,48 @@
+from dotenv import load_dotenv
 
-# def get_lyrics_url_from_website():
-#     # https://www.disneyclips.com/lyrics/
+load_dotenv()
+import json
+import os
 
-import aiohttp
-import asyncio
-from bs4 import BeautifulSoup
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.llms import OpenAI
+from langchain.vectorstores import DeepLake
 
-from typing import List, TypedDict, Tuple, Optional
-
-class Lyric(TypedDict):
-    name: str 
-    text: str
-
-class Movie(TypedDict):
-    title: str 
-    lyrics: List[Lyric]
+from names import DATASET_ID, MODEL_ID
 
 
-URL = "https://www.disneyclips.com/lyrics/"
+def create_db(dataset_path: str, json_filepath: str) -> DeepLake:
+    with open(json_filepath, "r") as f:
+        data = json.load(f)
+
+    texts = []
+    metadatas = []
+
+    for movie, lyrics in data.items():
+        for lyric in lyrics:
+            texts.append(lyric["text"])
+            metadatas.append(
+                {
+                    "movie": movie,
+                    "name": lyric["name"],
+                    "embed_url": lyric["embed_url"],
+                }
+            )
+
+    embeddings = OpenAIEmbeddings(model=MODEL_ID)
+
+    db = DeepLake.from_texts(
+        texts, embeddings, metadatas=metadatas, dataset_path=dataset_path
+    )
+
+    return db
 
 
-async def get_lyrics_urls_from_movie_url(url: str, session: aiohttp.ClientSession) -> Optional[Tuple[str, str]]:
-    async with session.get(url) as response:
-        html = await response.text()
-        soup = BeautifulSoup(html, 'html.parser')
-        table = soup.find('table', {'class': 'songs'})
-        names_and_urls = None
-        if table:
-            links = table.find_all('a')
-            names_and_urls = []
-            for link in links:
-                names_and_urls.append((link.text,  f"{URL}/{link.get('href')}"))
-        return names_and_urls
-
-async def get_lyric_from_lyric_url(url: str, name: str, session: aiohttp.ClientSession) -> Lyric:
-    async with session.get(url) as response:
-        html = await response.text()
-        soup = BeautifulSoup(html, 'html.parser')
-        div = soup.find('div', {'id': 'cnt'}).find('div', {'class': 'main'})
-        paragraphs = div.find_all('p')
-        text = ""
-        for p in paragraphs:
-            text += p.text
-        return text
+def load_db(dataset_path: str, *args, **kwargs) -> DeepLake:
+    db = DeepLake(dataset_path, *args, **kwargs)
+    return db
 
 
-
-async def get_movie_names_and_urls(session: aiohttp.ClientSession) -> List[Tuple[str, str]]:
-    async with session.get(URL) as response:
-        html = await response.text()
-        soup = BeautifulSoup(html, 'html.parser')
-        links = soup.find('div', {'id': 'cnt'}).find('div', {'class': 'main'}).find_all('a')
-        movie_names_and_urls = [(link.text, f"{URL}/{link.get('href')}") for link in links]
-        return movie_names_and_urls
-       
-
-
-
-async def main():
-    async with aiohttp.ClientSession() as session:
-        names_and_urls = await get_movie_names_and_urls(session)
-        data = await asyncio.gather(*[asyncio.create_task(get_lyrics_urls_from_movie_url(names, url, session)) for (names, url) in names_and_urls])
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
+if __name__ == "__main__":
+    dataset_path = f"hub://{os.environ['ACTIVELOOP_ORG_ID']}/{DATASET_ID}"
+    create_db(dataset_path, "data/lyrics_with_spotify_url.json")

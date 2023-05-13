@@ -1,0 +1,11 @@
+openai
+torch==2.0.1
+torchvision
+python-dotenv
+deeplake
+langchain
+tiktoken
+aiohttp
+cchardet
+aiodns
+streamlit
