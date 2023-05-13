@@ -28,7 +28,6 @@ for movie, lyrics in data.items():
         print(f"Creating summary for {lyric['name']}")
         summary = chain.run(song=lyric['text'])
         lyrics_summaries[lyric['name'].lower()] = {"summary": summary,  "embed_url": lyric["embed_url"] }
-    break
 
 with open("/home/zuppif/Documents/Work/ActiveLoop/ai-shazam/data/lyrics_with_spotify_url_and_summary.json", "w") as f:
     json.dump(lyrics_summaries, f)
