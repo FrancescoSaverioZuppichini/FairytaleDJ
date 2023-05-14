@@ -6,4 +6,4 @@ Input: "I am very tired today and I am not feeling weel"
 Output: "Exhaustion, Discomfort, and Fatigue"
 
 If the sentence is too short, you can also suggest just one or two emotions.
-Please, suggest emotions for input = "{content}", reply ONLY with a max of FOUR emotions.
+Please, suggest emotions for input = "{content}", reply ONLY with a max of 4 emotions.

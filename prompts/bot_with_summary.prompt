@@ -4,7 +4,7 @@ You the following list of songs:
 
 {songs}
 
-Given a input, output the song name that matches its content. Just the song name
+Given a input, output the song name that its content vibe, emotions, theme. Just the song name. If the content containes negative sentiment, please provide a song name to help the user instead.
 
 For example: 
 Input: "Today I am not feeling great"

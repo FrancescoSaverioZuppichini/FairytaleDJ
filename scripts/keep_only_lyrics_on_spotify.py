@@ -44,7 +44,9 @@ for movie, lyrics in data.items():
     for lyric in lyrics:
         name = lyric["name"].lower()
         if name in spotify_tracks:
-            data_filtered[movie].append({**lyric, **{ 'embed_url' : spotify_tracks[name]['embed_url']}})
+            data_filtered[movie].append(
+                {**lyric, **{"embed_url": spotify_tracks[name]["embed_url"]}}
+            )
             tot += 1
 print(tot)
 

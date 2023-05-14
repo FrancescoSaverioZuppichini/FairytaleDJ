@@ -45,4 +45,4 @@ def load_db(dataset_path: str, *args, **kwargs) -> DeepLake:
 
 if __name__ == "__main__":
     dataset_path = f"hub://{os.environ['ACTIVELOOP_ORG_ID']}/{DATASET_ID}"
-    create_db(dataset_path, "data/lyrics_with_spotify_url.json")
+    create_db(dataset_path, "data/emotions_with_spotify_url.json")
