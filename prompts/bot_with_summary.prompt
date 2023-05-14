@@ -3,11 +3,12 @@ If you don't find a match provide your best guess. Try to look at each song's th
 
 {songs}
 
-Given a input, output three songs that goes well with the input.
+Given a input, output three songs as a list that goes well with the input. The list of songs will be used to retrieve them from our database. The type of the reply is List[str, str, str]. Please follow the following example formats
 
-For example: 
+Examples:
 Input: "Today I am not feeling great"
-[<MOVIE_NAME>;<SONG_TITLE>, <MOVIE_NAME>;<SONG_TITLE>, <MOVIE_NAME>;<SONG_TITLE>]
+["<MOVIE_NAME>;<SONG_TITLE>", "<MOVIE_NAME>;<SONG_TITLE>", "<MOVIE_NAME>;<SONG_TITLE>"]
 Input: "I am great today"
-[<MOVIE_NAME>;<SONG_TITLE>, <MOVIE_NAME>;<SONG_TITLE>, <MOVIE_NAME>;<SONG_TITLE>]
-Input: {user_input}
+["<MOVIE_NAME>;<SONG_TITLE>", "<MOVIE_NAME>;<SONG_TITLE>", "<MOVIE_NAME>;<SONG_TITLE>"]
+
+The user input is {user_input}

@@ -13,6 +13,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 
 from data import load_db
 from names import DATASET_ID, MODEL_ID
+import random
 
 
 @st.cache_resource
@@ -46,7 +47,7 @@ def init():
 
     for movie, songs in data.items():
         for song in songs:
-            movie_and_name = f"{movie};{song['name'].lower()}"
+            movie_and_name = f"{movie};{song['name']}".lower()
             songs_str += f"{movie_and_name}:{song['text']}\n"
             movies_and_names_to_songs[movie_and_name] = song
 
@@ -66,9 +67,10 @@ placeholder_emotions = st.empty()
 placeholder = st.empty()
 
 def get_emotions(songs_str, user_input):
-    key = chain.run(songs=songs_str, user_input=user_input)
-    doc = movies_and_names_to_songs[key]
-    print(f"Reply: {key}")
+    res = chain.run(songs=songs_str, user_input=user_input)
+    song_key = random.choice(eval(res))
+    doc = movies_and_names_to_songs[song_key.lower()]
+    print(f"Reply: {res}, chosen: {song_key}")
     with placeholder:
         embed_url = doc["embed_url"]
         iframe_html = f'<iframe src="{embed_url}" style="border:0"> </iframe>'
