@@ -7,7 +7,7 @@ from langchain.prompts import PromptTemplate
 
 load_dotenv()
 import os
-
+import json
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings.openai import OpenAIEmbeddings
 
@@ -29,17 +29,30 @@ def init():
     )
 
     prompt = PromptTemplate(
-        input_variables=["content"],
-        template=Path("prompts/bot.prompt").read_text(),
-    )
+    input_variables=["songs", "user_input"],
+    template=Path("prompts/bot_with_summary.prompt").read_text(),
+)
 
     llm = ChatOpenAI(temperature=0.7)
 
     chain = LLMChain(llm=llm, prompt=prompt)
 
-    return db, chain
+    with open("data/emotions_with_spotify_url.json", "r") as f:
+        data = json.load(f)
+    
+    movies_and_names_to_songs = {}
 
-db, chain = init()
+    songs_str = ""
+
+    for movie, songs in data.items():
+        for song in songs:
+            movie_and_name = f"{movie};{song['name'].lower()}"
+            songs_str += f"{movie_and_name}:{song['text']}\n"
+            movies_and_names_to_songs[movie_and_name] = song
+
+    return db, chain, movies_and_names_to_songs, songs_str
+
+db, chain, movies_and_names_to_songs, songs_str = init()
 
 st.title("Disney song for you")
 
@@ -52,20 +65,14 @@ clicked = st.button("Click me")
 placeholder_emotions = st.empty()
 placeholder = st.empty()
 
-def get_emotions(user_input):
-    emotions = chain.run(content=user_input)
-    print(f"Emotions: {emotions}")
-    matches = db.similarity_search_with_score(emotions, distance_metric="cos")
-    print(matches)
-    doc, score = matches[0]
-    iframes_html = ""
-    with placeholder_emotions:
-        st.write(emotions)
+def get_emotions(songs_str, user_input):
+    key = chain.run(songs=songs_str, user_input=user_input)
+    doc = movies_and_names_to_songs[key]
+    print(f"Reply: {key}")
     with placeholder:
-        embed_url = doc.metadata["embed_url"]
+        embed_url = doc["embed_url"]
         iframe_html = f'<iframe src="{embed_url}" style="border:0"> </iframe>'
         st.components.v1.html(f"<div style='display:flex;flex-direction:column'>{iframe_html}</div>")
 
-
 if clicked:
-    get_emotions(text_input)
+    get_emotions(songs_str, text_input)

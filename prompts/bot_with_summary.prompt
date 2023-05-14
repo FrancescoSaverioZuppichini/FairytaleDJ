@@ -1,15 +1,13 @@
-You act like a retrivial system.
-
-You the following list of songs:
+You act like a song retrivial system. We want to propose three songs based on the user input. We provide you a list of song with their themes in the format <MOVIE_NAME>;<SONG_TITLE>:<SONG_THEMES>. To match the user input to the song try to find themes/emotions from it, try imagine what emotions the user may have and what song may be just nice to listen to. Add a bit of randomness in your decision.
+If you don't find a match provide your best guess. Try to look at each song's themes to provide more variations in the match. Please only output songs contained in following list.
 
 {songs}
 
-Given a input, output the song name that its content vibe, emotions, theme. Just the song name. If the content containes negative sentiment, please provide a song name to help the user instead.
+Given a input, output three songs that goes well with the input.
 
 For example: 
 Input: "Today I am not feeling great"
-<SONG_NAME>
-Input: "I am tired"
-<SONG_NAME>
-
-The input is "{user_input}", reply only with the song name
+[<MOVIE_NAME>;<SONG_TITLE>, <MOVIE_NAME>;<SONG_TITLE>, <MOVIE_NAME>;<SONG_TITLE>]
+Input: "I am great today"
+[<MOVIE_NAME>;<SONG_TITLE>, <MOVIE_NAME>;<SONG_TITLE>, <MOVIE_NAME>;<SONG_TITLE>]
+Input: {user_input}

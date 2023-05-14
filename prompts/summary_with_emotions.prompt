@@ -1,0 +1,7 @@
+I am building a retrieval system. Given the following song lirics
+
+{song}
+
+You are task to produce a list of 8 emotions that I will later use to retrieve the song. 
+
+Please provide only a list of comma separated  emotions
