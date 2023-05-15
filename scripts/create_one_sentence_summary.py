@@ -1,3 +1,7 @@
+"""
+This script takes all the songs we have and create a summary for each lyric
+"""
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,7 +25,7 @@ llm = ChatOpenAI(temperature=0)
 chain = LLMChain(llm=llm, prompt=prompt)
 
 with open(
-    "/home/zuppif/Documents/Work/ActiveLoop/ai-shazam/data/lyrics_with_spotify_url.json",
+    "data/lyrics_with_spotify_url.json",
     "r",
 ) as f:
     data = json.load(f)
@@ -38,7 +42,7 @@ for movie, lyrics in data.items():
         }
 
 with open(
-    "/home/zuppif/Documents/Work/ActiveLoop/ai-shazam/data/lyrics_with_spotify_url_and_summary.json",
+    "data/lyrics_with_spotify_url_and_summary.json",
     "w",
 ) as f:
     json.dump(lyrics_summaries, f)

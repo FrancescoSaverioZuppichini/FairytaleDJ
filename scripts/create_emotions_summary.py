@@ -1,3 +1,8 @@
+"""
+This script takes all the songs we have and use the lyric to create a list of 8 emotions we then use to replace the lyric itself.
+This is needed to properly match user's emotions to the songs.
+"""
+
 from dotenv import load_dotenv
 
 load_dotenv()

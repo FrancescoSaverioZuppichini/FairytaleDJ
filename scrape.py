@@ -1,6 +1,3 @@
-# def get_lyrics_url_from_website():
-#     # https://www.disneyclips.com/lyrics/
-
 import asyncio
 import json
 from collections import defaultdict
@@ -9,6 +6,10 @@ from typing import List, Optional, Tuple, TypedDict
 
 import aiohttp
 from bs4 import BeautifulSoup
+
+"""
+This file scrapes disney songs + lyrics from "https://www.disneyclips.com/lyrics/"
+"""
 
 URL = "https://www.disneyclips.com/lyrics/"
 

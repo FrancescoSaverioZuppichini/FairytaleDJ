@@ -1,9 +1,11 @@
-"""This script will keep only the lyrics that are in the Spotify "Disney Hits" playlist
+"""
+This script will keep only the songs that are in the Spotify "Disney Hits" playlist
 """
 from dotenv import load_dotenv
 
 load_dotenv()
 import json
+from collections import defaultdict
 
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -16,10 +18,6 @@ items = results["playlists"]["items"]
 
 uri = "spotify:playlist:37i9dQZF1DX8C9xQcOrE6T"
 playlist = spotify.playlist(uri)
-
-# with open("spotify_disney_songs.json", "w") as f:
-#     json.dump(playlist,f)
-
 
 with open("data/lyrics.json", "r") as f:
     data = json.load(f)
@@ -36,7 +34,6 @@ for item in playlist["tracks"]["items"]:
     }
 
 # here we add only songs that are in the Disney spotify playlist
-from collections import defaultdict
 
 data_filtered = defaultdict(list)
 tot = 0
