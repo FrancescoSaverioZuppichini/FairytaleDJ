@@ -63,7 +63,7 @@ st.set_page_config(initial_sidebar_state=st.session_state.sidebar_state)
 
 db, chain = init()
 
-st.title("Disney songs for you 🎵🏰")
+st.title("Disney songs for you 🎵🏰🔮")
 st.markdown(
     """
 *<small>Made with [DeepLake](https://www.deeplake.ai/) 🚀 and [LangChain](https://python.langchain.com/en/latest/index.html) 🦜⛓️</small>*
