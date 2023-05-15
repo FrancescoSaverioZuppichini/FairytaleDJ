@@ -1,5 +1,5 @@
 ---
-title: "DisneyDJ"
+title: "FairytaleDJ"
 emoji: "🔮"
 colorFrom: "indigo"
 colorTo: "purple"
