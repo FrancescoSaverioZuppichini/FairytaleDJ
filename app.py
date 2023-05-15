@@ -63,7 +63,7 @@ st.set_page_config(initial_sidebar_state=st.session_state.sidebar_state)
 
 db, chain = init()
 
-st.title("Disney songs for you 🎵🏰🔮")
+st.title("FairytaleDJ 🎵🏰🔮")
 st.markdown(
     """
 *<small>Made with [DeepLake](https://www.deeplake.ai/) 🚀 and [LangChain](https://python.langchain.com/en/latest/index.html) 🦜⛓️</small>*
@@ -112,7 +112,7 @@ with st.sidebar:
         step=1,
     )
     number_of_displayed_songs = st.slider(
-        "Number of displayed songs", min_value=1, max_value=4, value=1, step=1
+        "Number of displayed songs", min_value=1, max_value=4, value=2, step=1
     )
 
 
