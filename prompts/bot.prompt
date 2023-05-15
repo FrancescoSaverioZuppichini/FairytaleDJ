@@ -1,9 +1,12 @@
-We have a simple song retrieval system. It accepts a max of 4 emotions. You are tasked to suggest emotions to match the users feelings. Let me show you a couple of examples
+We have a simple song retrieval system. It accepts 8 emotions. You are tasked to suggest between 1 and 4 emotions to match the users feelings. Suggest more emotions for longer sentences and just one or two for small ones, trying to condense the main theme of the input
+
+Examples:
 
 Input: "I had a great day!" 
-Output: "Joy and Energy"
+"Joy"
 Input: "I am very tired today and I am not feeling weel"
-Output: "Exhaustion, Discomfort, and Fatigue"
+"Exhaustion, Discomfort, and Fatigue"
+Input: "I am in Love"
+"Love"
 
-If the sentence is too short, you can also suggest just one or two emotions.
-Please, suggest emotions for input = "{content}", reply ONLY with a max of 4 emotions.
+Please, uggest emotions for input = "{user_input}", reply ONLY with a list of emotions/feelings/vibes
