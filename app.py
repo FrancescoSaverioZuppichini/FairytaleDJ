@@ -6,10 +6,7 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
 load_dotenv()
-import json
 import os
-import random
-from enum import Enum
 from typing import List, Tuple
 
 import numpy as np
@@ -20,6 +17,7 @@ from langchain.schema import Document
 from data import load_db
 from names import DATASET_ID, MODEL_ID
 from storage import RedisStorage, UserInput
+from utils import weighted_random_sample
 
 
 class RetrievalType:
@@ -31,6 +29,7 @@ Matches = List[Tuple[Document, float]]
 USE_STORAGE = os.environ.get("USE_STORAGE", "True").lower() in ("true", "t", "1")
 
 print("USE_STORAGE", USE_STORAGE)
+
 
 @st.cache_resource
 def init():
@@ -139,7 +138,9 @@ def get_song(user_input: str, k: int = 20):
     docs, scores = zip(
         *normalize_scores_by_sum(filter_scores(matches, filter_threshold))
     )
-    choosen_docs = np.random.choice(docs, size=number_of_displayed_songs, p=scores)
+    choosen_docs = weighted_random_sample(
+        np.array(docs), np.array(scores), n=number_of_displayed_songs
+    ).tolist()
     return choosen_docs, emotions
 
 
@@ -175,6 +176,7 @@ def set_song(user_input):
             )
             if not success_storage:
                 print("[ERROR] was not able to store user_input")
+
 
 if run_btn:
     set_song(text_input)
