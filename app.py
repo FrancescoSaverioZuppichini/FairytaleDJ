@@ -28,8 +28,9 @@ class RetrievalType:
 
 
 Matches = List[Tuple[Document, float]]
-USE_STORAGE = os.getenv("USE_STORAGE", "False").lower() in ("true", "1", "t")
+USE_STORAGE = os.environ.get("USE_STORAGE", "True").lower() in ("true", "t", "1")
 
+print("USE_STORAGE", USE_STORAGE)
 
 @st.cache_resource
 def init():
@@ -148,6 +149,7 @@ def set_song(user_input):
     # take first 120 chars
     user_input = user_input[:120]
     docs, emotions = get_song(user_input, k=max_number_of_songs)
+    print(docs)
     songs = []
     with placeholder_emotions:
         st.markdown("Your emotions: `" + emotions + "`")
