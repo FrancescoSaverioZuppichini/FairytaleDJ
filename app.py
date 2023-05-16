@@ -19,6 +19,7 @@ from langchain.schema import Document
 
 from data import load_db
 from names import DATASET_ID, MODEL_ID
+from storage import RedisStorage, UserInput
 
 
 class RetrievalType:
@@ -42,6 +43,9 @@ def init():
         read_only=True,
     )
 
+    storage = RedisStorage(
+        host=os.environ["UPSTASH_URL"], password=os.environ["UPSTASH_PASSWORD"]
+    )
     prompt = PromptTemplate(
         input_variables=["user_input"],
         template=Path("prompts/bot.prompt").read_text(),
@@ -51,7 +55,7 @@ def init():
 
     chain = LLMChain(llm=llm, prompt=prompt)
 
-    return db, chain
+    return db, storage, chain
 
 
 # Don't show the setting sidebar
@@ -61,7 +65,7 @@ if "sidebar_state" not in st.session_state:
 st.set_page_config(initial_sidebar_state=st.session_state.sidebar_state)
 
 
-db, chain = init()
+db, storage, chain = init()
 
 st.title("FairytaleDJ 🎵🏰🔮")
 st.markdown(
@@ -143,12 +147,15 @@ def set_song(user_input):
     # take first 120 chars
     user_input = user_input[:120]
     docs, emotions = get_song(user_input, k=max_number_of_songs)
+    songs = []
     with placeholder_emotions:
         st.markdown("Your emotions: `" + emotions + "`")
     with placeholder:
         iframes_html = ""
         for doc in docs:
-            print(doc.metadata["name"])
+            name = doc.metadata["name"]
+            print(f"song = {name}")
+            songs.append(name)
             embed_url = doc.metadata["embed_url"]
             iframes_html += (
                 f'<iframe src="{embed_url}" style="border:0;height:100px"> </iframe>'
@@ -158,9 +165,12 @@ def set_song(user_input):
             f"<div style='display:flex;flex-direction:column'>{iframes_html}</div>",
             unsafe_allow_html=True,
         )
-        # st.components.v1.html(
-        #     f"<div>{iframes_html}</div>"
-        # )
+
+        success_storage = storage.store(
+            UserInput(text=user_input, emotions=emotions, songs=songs)
+        )
+        if not success_storage:
+            print("[ERROR] was not able to store user_input")
 
 
 if run_btn:
