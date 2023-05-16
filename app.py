@@ -28,6 +28,7 @@ class RetrievalType:
 
 
 Matches = List[Tuple[Document, float]]
+USE_STORAGE = os.getenv("USE_STORAGE", "False").lower() in ("true", "1", "t")
 
 
 @st.cache_resource
@@ -166,12 +167,12 @@ def set_song(user_input):
             unsafe_allow_html=True,
         )
 
-        success_storage = storage.store(
-            UserInput(text=user_input, emotions=emotions, songs=songs)
-        )
-        if not success_storage:
-            print("[ERROR] was not able to store user_input")
-
+        if USE_STORAGE:
+            success_storage = storage.store(
+                UserInput(text=user_input, emotions=emotions, songs=songs)
+            )
+            if not success_storage:
+                print("[ERROR] was not able to store user_input")
 
 if run_btn:
     set_song(text_input)

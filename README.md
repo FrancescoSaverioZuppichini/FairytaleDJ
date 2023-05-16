@@ -50,6 +50,8 @@ UPSTASH_URL=<UPSTASH_URL>
 UPSTASH_PASSWORD=<UPSTASH_PASSWORD>
 ```
 
+If you **don't want to use upstash** set the `USE_STORAGE=False`
+
 Then
 
 ```
