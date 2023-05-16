@@ -103,7 +103,7 @@ placeholder = st.empty()
 with st.sidebar:
     st.text("App settings")
     filter_threshold = st.slider(
-        "Threadhol used to filter out low scoring songs",
+        "Threshold used to filter out low scoring songs",
         min_value=0.0,
         max_value=1.0,
         value=0.8,
