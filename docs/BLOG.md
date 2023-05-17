@@ -132,6 +132,8 @@ Let's see some examples:
 "I need to cry" -> "Sadness, Grief, Sorrow, Despair" 
 ```
 
+![alt](images/workflow.png)
+
 Then we used these emotions to actually perform the similarity search on the db.
 
 ```python
