@@ -4,9 +4,9 @@ Examples:
 
 Input: "I had a great day!" 
 "Joy"
-Input: "I am very tired today and I am not feeling weel"
+Input: "I am very tired today and I am not feeling well"
 "Exhaustion, Discomfort, and Fatigue"
 Input: "I am in Love"
 "Love"
 
-Please, uggest emotions for input = "{user_input}", reply ONLY with a list of emotions/feelings/vibes
+Please, suggest emotions for input = "{user_input}", reply ONLY with a list of emotions/feelings/vibes
