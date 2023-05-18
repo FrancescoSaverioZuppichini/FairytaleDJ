@@ -7,7 +7,7 @@ TL;DR We used [LangChain](https://python.langchain.com/en/latest/index.html), [O
 A demo is on [Hugging Face 🤗](https://huggingface.co/spaces/Francesco/FairytaleDJ)
 
 <!-- <iframe src="https://huggingface.co/spaces/Francesco/FairytaleDJ"/> -->
-THey there! Today we will see how to leverage [DeepLake](https://www.deeplake.ai/) to create a document retrieval system. This won't be your usual Q&A demo app were we just directly a user's query to embedded documents using [LangChain](https://python.langchain.com/en/latest/index.html). Nope, we will showcase how we can leverage LLMs to encode our data in such a way that will make our matching easier, better and faster.
+Hey there! Today we will see how to leverage [DeepLake](https://www.deeplake.ai/) to create a document retrieval system. This won't be your usual Q&A demo app were we just directly a user's query to embedded documents using [LangChain](https://python.langchain.com/en/latest/index.html). Nope, we will showcase how we can leverage LLMs to encode our data in such a way that will make our matching easier, better and faster.
 
 Step by step, we'll unpack the behind-the-scenes of [`FairytaleDJ`](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ) a web app to recommend Disney songs based on user input. **The goal is simple:** We ask how the user is feeling and we want to somehow retrieve Disney songs that go "well" with that input. For example, if the user is sad, probably a song like [Reflection from Mulan](https://www.youtube.com/watch?v=lGGXsm0a5s0) would be appropriate. 
 
@@ -197,7 +197,7 @@ emotions = chain.run(user_input=user_input)
 matches = db.similarity_search_with_score(emotions, distance_metric="cos", k=k)
 ```
 
-These are the scores obtained from that search (`k=100`)
+These are the scores obtained from that search (`k=100`), they are more spreaded apart.
 
 ![alt](images/emotions_search_scores.png)
 
