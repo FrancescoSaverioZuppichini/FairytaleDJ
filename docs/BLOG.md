@@ -7,11 +7,11 @@ TL;DR We used [LangChain](https://python.langchain.com/en/latest/index.html), [O
 A demo is on [Hugging Face 🤗](https://huggingface.co/spaces/Francesco/FairytaleDJ)
 
 <!-- <iframe src="https://huggingface.co/spaces/Francesco/FairytaleDJ"/> -->
-Today we will see how to leverage [DeepLake](https://www.deeplake.ai/) to create a document retrieval system. This won't be your usual Q&A demo app in which they directly try to match a user query to the embedded documents using [LangChain](https://python.langchain.com/en/latest/index.html), we will showcase a more nish case in which we will have to first understand how we can leverage LLMs to encode our data making our matching easier and better.
+THey there! Today we will see how to leverage [DeepLake](https://www.deeplake.ai/) to create a document retrieval system. This won't be your usual Q&A demo app were we just directly a user's query to embedded documents using [LangChain](https://python.langchain.com/en/latest/index.html). Nope, we will showcase how we can leverage LLMs to encode our data in such a way that will make our matching easier, better and faster.
 
-So, step by step we will show you how we created [`FairytaleDJ`](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ) a web app to recommend Disney songs based on user input. **The goal is simple:** We ask how the user is feeling and we want to somehow retrieve Disney songs that go "well" with that input. For example, if the user is sad, probably a song like [Reflection from Mulan](https://www.youtube.com/watch?v=lGGXsm0a5s0) would be appropriate. 
+Step by step, we'll unpack the behind-the-scenes of [`FairytaleDJ`](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ) a web app to recommend Disney songs based on user input. **The goal is simple:** We ask how the user is feeling and we want to somehow retrieve Disney songs that go "well" with that input. For example, if the user is sad, probably a song like [Reflection from Mulan](https://www.youtube.com/watch?v=lGGXsm0a5s0) would be appropriate. 
 
-This is a perfect example where vanilla Q&A fails, if you search for similarities between users' feelings (e.g. "Today I am great") and songs lyrics you won't really find good matches because the song embeddings are "more open" in a sense that they represent everything in each song lyric. What you may want to do is to encode both inputs, users and lyrics, into some sort of similar representation and then search. We won't spoil too much, so shopping list time. We need mainly three things: data, a way to encode it and a way to match it with user input.
+This is a perfect example where vanilla Q&A fails. If you try to find similarities between users' feelings (like, "Today I am great") and song lyrics, you won't really get too good results. That's because song embeddings capture everything in the lyrics, making them "more open". Instead, what we want to do is to encode both inputs, users and lyrics, into a similar representation and then run the search. We won't spoil too much here, so shopping list time. We need mainly three things: data, a way to encode it and a way to match it with user input.
 
 
 ## Getting the data
@@ -89,6 +89,32 @@ Next step was to find a way to match our songs with a given user inputs, we trie
 #### Similarity search of direct embeddings.
 This approach was straightforward. We create embeddings for the lyrics and the user input with gpt3 and do a similarity search. Unfortunatly, we noticed very bad suggestions, this is due to the fact that we want to match user's emotions to the songs not exactly what it is saying. 
 
+For example, if we search for similar songs using "I am sad", we will see very similar scores across all documents
+
+```python
+ db.similarity_search_with_score("I am happy", distance_metric="cos", k=100)
+ ```
+
+If we plot the scores using a box plot, we will see they mostly are around `0.74` 
+
+![alt](images/full_search_scores.png)
+
+While the first 10 songs do not really match so well
+
+```
+The World Es Mi Familia 0.7777353525161743
+Go the Distance 0.7724394202232361
+Waiting on a Miracle 0.7692896127700806
+Happy Working Song 0.7679054141044617
+In Summer 0.7620900273323059
+So Close 0.7601353526115417
+When I Am Older 0.7582702040672302
+How Far I'll Go 0.7560539245605469
+You're Welcome 0.7539903521537781
+What Else Can I Do? 0.7535801529884338
+```
+
+
 #### Using ChatGPT as a retrieval system
 We also tried to nuke the whole lyrics into chatGPT and asked it to return matching songs with the user input. We had to first create a one-sentence summary of each lyric to fit into 4096 tokens. Resulting in around 3k tokens per request (0.006$). It follows the prompt template, very simple but very long. The `{songs}` variable holds the JSON with all the songs
 
@@ -127,7 +153,7 @@ Please provide only a list of comma separated  emotions
 ```
 For example, using the "Arabian Nights" from Aladdin (shown in the previous section), we obtained `"nostalgic, adventurous, exotic, intense, romantic, mysterious, whimsical, passionate"`. 
 
-We then embed each emotion for each song with gpt3 and store it into 
+We then embed each emotion for each song with gpt3 and store it into. 
 
 The full script is [here](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ/blob/main/scripts/create_emotions_summary.py)
 
@@ -162,13 +188,35 @@ Let's see some examples:
 
 Then we used these emotions to actually perform the similarity search on the db.
 
+
 ```python
+user_input = "I am happy"
 # we use chatGPT to get emotions from a user input
 emotions = chain.run(user_input=user_input)
 # we find the k more similar song
 matches = db.similarity_search_with_score(emotions, distance_metric="cos", k=k)
 ```
-Then we first filter out the low-scoring one
+
+These are the scores obtained from that search (`k=100`)
+
+![alt](images/emotions_search_scores.png)
+
+And the songs makes more sense.
+
+```
+Down in New Orleans (Finale) 0.9068354368209839
+Happy Working Song 0.9066014885902405
+Love is an Open Door 0.8957026600837708
+Circle of Life 0.8907418251037598
+Where You Are 0.8890194892883301
+In Summer 0.8889626264572144
+Dig a Little Deeper 0.8887585401535034
+When We're Human 0.8860496282577515
+Hakuna Matata 0.8856213688850403
+The World Es Mi Familia 0.884093165397644
+```
+
+We also implement some postprocessing. We first filter out the low-scoring one
 
 ```python
 def filter_scores(matches: Matches, th: float = 0.8) -> Matches:
@@ -176,6 +224,7 @@ def filter_scores(matches: Matches, th: float = 0.8) -> Matches:
 
 matches = filter_scores(matches, 0.8)
 ```
+
 To add more variations, aka not always recommend the first one, we need to sample from the list of candidate matches. To do so, we first ensure the scores sum to one by diving by their sum.
 
 ```python
