@@ -7,14 +7,16 @@ TL;DR We used [LangChain](https://python.langchain.com/en/latest/index.html), [O
 A demo is on [Hugging Face 🤗](https://huggingface.co/spaces/Francesco/FairytaleDJ)
 
 <!-- <iframe src="https://huggingface.co/spaces/Francesco/FairytaleDJ"/> -->
+Today we will see how to leverage [DeepLake](https://www.deeplake.ai/) to create a document retrieval system. This won't be your usual Q&A demo app in which they directly try to match a user query to the embedded documents using [LangChain](https://python.langchain.com/en/latest/index.html), we will showcase a more nish case in which we will have to first understand how we can leverage LLMs to encode our data making our matching easier and better.
 
-Today we will see how we created [`FairytaleDJ`](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ) a web app to recommend Disney songs based on user input. **The goal is simple:** We ask how the user is feeling and we want to somehow retrive Disney songs that go "well" with that input. 
+So, step by step we will show you how we created [`FairytaleDJ`](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ) a web app to recommend Disney songs based on user input. **The goal is simple:** We ask how the user is feeling and we want to somehow retrieve Disney songs that go "well" with that input. For example, if the user is sad, probably a song like [Reflection from Mulan](https://www.youtube.com/watch?v=lGGXsm0a5s0) would be appropriate. 
 
-For example, if the user is sad, probably a song like [Reflection from Mulan](https://www.youtube.com/watch?v=lGGXsm0a5s0) would be appropriate. 
+This is a perfect example where vanilla Q&A fails, if you search for similarities between users' feelings (e.g. "Today I am great") and songs lyrics you won't really find good matches because the song embeddings are "more open" in a sense that they represent everything in each song lyric. What you may want to do is to encode both inputs, users and lyrics, into some sort of similar representation and then search. We won't spoil too much, so shopping list time. We need mainly three things: data, a way to encode it and a way to match it with user input.
+
 
 ## Getting the data
 
-We decided to scrape `https://www.disneyclips.com/lyrics/`, a website containing all the lyrics for **all** Disney songs ever made. The code is [here](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ/blob/main/scrape.py) and it relies on `asyncio` to speed up things, we won't focus too much on it.
+To get our songs, we decided to scrape `https://www.disneyclips.com/lyrics/`, a website containing all the lyrics for **all** Disney songs ever made. The code is [here](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ/blob/main/scrape.py) and it relies on `asyncio` to speed up things, we won't focus too much on it.
 
 Then, we used [Spotify Python APIs](https://spotipy.readthedocs.io/en/2.22.1/) to get all the embedding URL for each song into the ["Disney Hits" Playlist](https://open.spotify.com/playlist/37i9dQZF1DX8C9xQcOrE6T). We proceed to remove all the songs that we had scraped but are not in this playlist. By doing so, we end up with 85 songs.
 
@@ -32,7 +34,7 @@ We end up with a [`json`](https://github.com/FrancescoSaverioZuppichini/Fairytal
   ],
 ```
 ## Data encoding
-We were looking for a good way to retrieve the songs. We evaluated different approaches. The used ActiveLoop [DeepLake](https://docs.deeplake.ai/en/latest/) vector db and more specifically its implementation in [LangChain](https://python.langchain.com/en/latest/ecosystem/deeplake.html).
+We were looking for a good way to retrieve the songs. We evaluated different approaches. We used ActiveLoop [DeepLake](https://docs.deeplake.ai/en/latest/) vector db and more specifically its implementation in [LangChain](https://python.langchain.com/en/latest/ecosystem/deeplake.html).
 
 Creating the dataset was very easy. Given the previous `json` file, we proceed to embed the `text` field using `langchain.embeddings.openai.OpenaAIEmbeddings` and add all the rest of keys/values as `metadata`
 
@@ -78,17 +80,41 @@ def load_db(dataset_path: str, *args, **kwargs) -> DeepLake:
 
 My `dataset_path` is `hub://<ACTIVELOOP_ORGANIZATION_ID>/<DATASET_NAME>`, but you can also store it locally. Their doc is [here](https://docs.activeloop.ai/getting-started/creating-datasets-manually)
 
+## Matching  
+
+Next step was to find a way to match our songs with a given user inputs, we tried several things till we found out a cheap way that works qualitavely well. So let's start with the failures 😅
+
 ### What didn't work
 
 #### Similarity search of direct embeddings.
 This approach was straightforward. We create embeddings for the lyrics and the user input with gpt3 and do a similarity search. Unfortunatly, we noticed very bad suggestions, this is due to the fact that we want to match user's emotions to the songs not exactly what it is saying. 
 
 #### Using ChatGPT as a retrieval system
-We also tried to nuke the whole lyrics into chatGPT and asked it to return matching songs with the user input. We had to first create a one-sentence summary of each lyric. Resulting in around 3k tokens per request (0.006$). That **did work** okayish but was overkill.
-Later on, we also tried the emotional encoding that we will talk about in the next section. It had a comparable performance
+We also tried to nuke the whole lyrics into chatGPT and asked it to return matching songs with the user input. We had to first create a one-sentence summary of each lyric to fit into 4096 tokens. Resulting in around 3k tokens per request (0.006$). It follows the prompt template, very simple but very long. The `{songs}` variable holds the JSON with all the songs
+
+```
+You act like a song retrivial system. We want to propose three songs based on the user input. We provide you a list of song with their themes in the format <MOVIE_NAME>;<SONG_TITLE>:<SONG_THEMES>. To match the user input to the song try to find themes/emotions from it, try imagine what emotions the user may have and what song may be just nice to listen to. Add a bit of randomness in your decision.
+If you don't find a match provide your best guess. Try to look at each song's themes to provide more variations in the match. Please only output songs contained in following list.
+
+{songs}
+
+Given a input, output three songs as a list that goes well with the input. The list of songs will be used to retrieve them from our database. The type of the reply is List[str, str, str]. Please follow the following example formats
+
+Examples:
+Input: "Today I am not feeling great"
+["<MOVIE_NAME>;<SONG_TITLE>", "<MOVIE_NAME>;<SONG_TITLE>", "<MOVIE_NAME>;<SONG_TITLE>"]
+Input: "I am great today"
+["<MOVIE_NAME>;<SONG_TITLE>", "<MOVIE_NAME>;<SONG_TITLE>", "<MOVIE_NAME>;<SONG_TITLE>"]
+
+The user input is {user_input}
+```
+
+That **did work** okayish but was overkill.
+Later on, we also tried the emotional encoding that we will talk about in the next section. It had a comparable performance.
 
 ### What did work: Similarity search of emotions embeddings.
-We convert each lyric to a list of 8 emotions using ChatGPT. [The prompt](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ/blob/main/prompts/summary_with_emotions.prompt) is the following
+
+Finally, we arrived at an approach that is unexpensive to run and gives good results. We convert each lyric to a list of 8 emotions using ChatGPT. [The prompt](https://github.com/FrancescoSaverioZuppichini/FairytaleDJ/blob/main/prompts/summary_with_emotions.prompt) is the following
 
 ```text
 I am building a retrieval system. Given the following song lyric
