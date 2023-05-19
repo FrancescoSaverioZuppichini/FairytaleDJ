@@ -246,9 +246,15 @@ for doc in docs:
     print(doc.metadata["name"])
 ```
 
-This is basically it. We create a webapp using [Streamlit](https://streamlit.io/) and we hosted the app on an [Hugging Face space](https://huggingface.co/spaces/Francesco/FairytaleDJ)
+And finally we have our songs. Then, we created a webapp using [Streamlit](https://streamlit.io/) and we hosted the app on an [Hugging Face space](https://huggingface.co/spaces/Francesco/FairytaleDJ)
+
 
 ![alt](images/app.png) 
+
+
+## Conclusion
+
+While we explained how to mix these technologies together to create a song recommendation system you can apply the same principles to more use cases. The main takeaway here is to understand how to leverage LLMs to make the data work for you by transforming it to fit your task better. This was crucial for us since only after the converted both users' inputs and songs' lyrics to a list of emotions, we were able to have good matches.
 
 That's all folks 🎉 
 
