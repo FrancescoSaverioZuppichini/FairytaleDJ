@@ -24,7 +24,7 @@ We also used [upstash](https://upstash.com/) to store user inputs/emotions and r
 The application follows a sequence of steps to deliver Disney songs matching the user's emotions:
 - **User Input**: The application starts by collecting user's emotional state through a text input.
 - **Emotion Encoding**: The user-provided emotions are then fed to a Language Model (LLM). The LLM interprets and encodes these emotions.
-- **Similarity Search**: These encoded emotions are utilized to perform a similarity search within our [vector database](https://www.deeplake.ai/). This database houses Disney songs, each represented as emotional embeddings.
+- **Similarity Search**: These encoded emotions are utilized to perform a similarity search within our [vector database](Deep Lake Vector Store in LangChain). This database houses Disney songs, each represented as emotional embeddings.
 - **Song Selection**: From the pool of top matching songs, the application randomly selects one. The selection is weighted, giving preference to songs with higher similarity scores.
 - **Song Retrieval**: The selected song's embedded player is displayed on the webpage for the user. Additionally, the LLM interpreted emotional state associated with the chosen song is displayed.
 
